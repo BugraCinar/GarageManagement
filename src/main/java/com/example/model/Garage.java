@@ -1,11 +1,13 @@
 package com.example.model;
 
-import lombok.Getter;
-
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
+
+import lombok.Getter;
 
 
 @Getter
@@ -26,13 +28,23 @@ public class Garage {
         return allVehicles.get(ticketId);
     }
 
+    public boolean isPlateAlreadyParked(String plate) {
+        return allVehicles.values().stream()
+                .anyMatch(vehicle -> vehicle.getPlate().equals(plate));
+    }
 
     public Set<Integer> getOccupiedSlotsByFloor(int floor) {
-        Set<Integer> occupied = new HashSet<>();
-        getAllVehicles().values().stream()
+        return allVehicles.values().stream()
                 .filter(v -> v.getFloor() == floor)
-                .forEach(v -> occupied.addAll(v.getAllocatedSlots()));
-        return occupied;
+                .flatMap(v -> v.getAllocatedSlots().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public List<Vehicle> getVehiclesByFloor(int floor) {
+        return allVehicles.values().stream()
+                .filter(vehicle -> vehicle.getFloor() == floor)
+                .sorted(Comparator.comparingInt(Vehicle::getTicketId))
+                .toList();
     }
 
 }

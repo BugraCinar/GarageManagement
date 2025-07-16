@@ -1,10 +1,12 @@
 package com.example.model;
 
-import lombok.Data;
-
 import java.util.List;
 
+import lombok.Data;
+
 @Data
+
+
 public class Vehicle {
 
     private static int ticketCounter = 1;
@@ -29,12 +31,12 @@ public class Vehicle {
     }
 
 
-    public Vehicle(int ticketId, String plate, String color, String typeStr, List<Integer> allocatedSlots, int floor) {
+    public Vehicle(Integer ticketId, String plate, String color, String typeStr, List<Integer> allocatedSlots, int floor) {
         this.plate = plate;
         this.color = color;
         this.type = VehicleType.fromString(typeStr);
         this.slotSize = this.type.getSlotSize();
-        this.ticketId = ticketId;
+        this.ticketId = ticketId;  // ticketCounter++ yerine parametreyi kullan
         this.allocatedSlots = allocatedSlots;
         this.floor = floor;
     }

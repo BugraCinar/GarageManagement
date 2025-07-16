@@ -1,15 +1,12 @@
 package com.example.services;
 
-
-import com.example.converter.TicketToVehicleConverter;
-import com.example.model.Garage;
-import com.example.model.Vehicle;
 import org.springframework.stereotype.Service;
 
-import com.example.entity.FirstFloorTicket;
-import com.example.entity.SecondFloorTicket;
-import com.example.repository.FirstFloorTicketRepository;
-import com.example.repository.SecondFloorTicketRepository;
+import com.example.converter.TicketToVehicleConverter;
+import com.example.entity.MyGarage;
+import com.example.model.Garage;
+import com.example.model.Vehicle;
+import com.example.repository.MyGarageRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,57 +14,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DbService {
 
-    private final FirstFloorTicketRepository firstFloorRepo;
-    private final SecondFloorTicketRepository secondFloorRepo;
+    private final MyGarageRepository myGarageRepo;
     private final Garage garage;
 
-
     public int getMaxTicketId() {
-        int maxFirstFloor = firstFloorRepo.findMaxTicketId().orElse(0);
-        int maxSecondFloor = secondFloorRepo.findMaxTicketId().orElse(0);
-        return Math.max(maxFirstFloor, maxSecondFloor);
+        return myGarageRepo.findMaxTicketId().orElse(0);
     }
 
-    public boolean isPlateAlreadyParked(String plate) {
-        return firstFloorRepo.existsByPlate(plate) || secondFloorRepo.existsByPlate(plate);
+    public void insertTicket(int ticketId, String plate, String color, String type, String allocatedSlots, int floor) {
+        MyGarage ticket = new MyGarage(ticketId, plate, color, type, allocatedSlots, floor);
+        myGarageRepo.save(ticket);
     }
 
-    public void insertFirstFloorTicket(int ticketId, String plate, String color, String type, String allocatedSlots) {
-        FirstFloorTicket ticket = new FirstFloorTicket(ticketId, plate, color, type, allocatedSlots);
-        firstFloorRepo.save(ticket);
+    public void deleteTicket(int ticketId) {
+        myGarageRepo.deleteByTicketId(ticketId);
     }
-
-    public void deleteFirstFloorTicket(int ticketId) {
-        firstFloorRepo.deleteByTicketId(ticketId);
-    }
-
-
-
-    public void insertSecondFloorTicket(int ticketId, String plate, String color, String type, String allocatedSlots) {
-        SecondFloorTicket ticket = new SecondFloorTicket(ticketId, plate, color, type, allocatedSlots);
-        secondFloorRepo.save(ticket);
-    }
-
-    public void deleteSecondFloorTicket(int ticketId) {
-        secondFloorRepo.deleteByTicketId(ticketId);
-    }
-
-
-
 
     public void loadVehiclesToGarage() {
-
-        firstFloorRepo.findAll().forEach(ticket -> {
-            Vehicle vehicle = TicketToVehicleConverter.convert(ticket, 1);
-            garage.addVehicle(vehicle);
-        });
-
-        secondFloorRepo.findAll().forEach(ticket -> {
-            Vehicle vehicle = TicketToVehicleConverter.convert(ticket, 2);
+        myGarageRepo.findAll().forEach(ticket -> {
+            Vehicle vehicle = TicketToVehicleConverter.convert(ticket);
             garage.addVehicle(vehicle);
         });
     }
-
-
-
 }
